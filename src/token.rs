@@ -25,13 +25,16 @@ pub struct Application {
 }
 
 pub async fn get_token_info(token: &str) -> Result<TokenInfo, Box<dyn std::error::Error>> {
-	let url = format!("https://api.intra.42.fr/oauth/token/info?access_token={}", token);
-	let resp = reqwest::get(&url).await?;
-	let token_info: TokenInfo = resp.json().await?;
-	Ok(token_info)
+    let url = format!(
+        "https://api.intra.42.fr/oauth/token/info?access_token={}",
+        token
+    );
+    let resp = reqwest::get(&url).await?;
+    let token_info: TokenInfo = resp.json().await?;
+    Ok(token_info)
 }
 
-pub async fn check_token_valide(token: &str ) -> Result<bool, Box<dyn std::error::Error>> {
+pub async fn check_token_valide(token: &str) -> Result<bool, Box<dyn std::error::Error>> {
     let token_info = get_token_info(token).await?;
     if token_info.expires_in_seconds.is_none() {
         return Ok(false);

@@ -20,7 +20,10 @@ mod tests {
 
     #[tokio::test]
     async fn token_info_success_test() {
-        let res = crate::token::get_token_info("946a16a374546f0ab723c207f04db05cd9c26442d77a548d669f90360a0a8319").await;
+        let res = crate::token::get_token_info(
+            "946a16a374546f0ab723c207f04db05cd9c26442d77a548d669f90360a0a8319",
+        )
+        .await;
         if let Ok(token_info) = res {
             println!("{:?}", token_info);
             assert_eq!(token_info.application.is_none(), false);
@@ -37,7 +40,10 @@ mod tests {
 
     #[tokio::test]
     async fn check_token_valide_success_test() {
-        let res = crate::token::check_token_valide("946a16a374546f0ab723c207f04db05cd9c26442d77a548d669f90360a0a8319").await;
+        let res = crate::token::check_token_valide(
+            "946a16a374546f0ab723c207f04db05cd9c26442d77a548d669f90360a0a8319",
+        )
+        .await;
         if let Ok(t) = res {
             assert_eq!(t, true);
         }
