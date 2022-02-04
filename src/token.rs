@@ -30,3 +30,11 @@ pub async fn get_token_info(token: &str) -> Result<TokenInfo, Box<dyn std::error
 	let token_info: TokenInfo = resp.json().await?;
 	Ok(token_info)
 }
+
+pub async fn check_token_valide(token: &str ) -> Result<bool, Box<dyn std::error::Error>> {
+    let token_info = get_token_info(token).await?;
+    if token_info.expires_in_seconds.is_none() {
+        return Ok(false);
+    }
+    Ok(true)
+}
