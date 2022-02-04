@@ -1,0 +1,13 @@
+[package]
+name = "ftapi"
+version = "0.1.0"
+edition = "2021"
+authors= ["bagmeg"]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+thiserror = { version = "1.0.30" }
+reqwest = { version = "0.11", features = ["json"] }
+serde = { version = "1.0.132", features = ["derive"] }
+tokio = { version = "1.16.1", features = ["macros"] }
