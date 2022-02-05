@@ -11,9 +11,19 @@ use url::Url;
 
 use crate::error::SessionError;
 
+#[derive(Clone, Debug)]
 pub struct Session {
     pub client_id: String,
     pub client_secret: String,
+}
+
+impl Session {
+    pub fn new() -> Self {
+        Session {
+            client_id: String::from("37b03bd9f3fa8ba93bc2736ef348fec878949ae649543d8cf0ea15c6743da0e3"),
+            client_secret: String::from("f9d31d50bd7fcdb68f83dfd961ba4184681f7baab8d0d8d8427c156a1fc1a733"),
+        }
+    }
 }
 
 pub async fn generate_token(session: Session) -> Result<String, SessionError> {
