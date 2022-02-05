@@ -13,25 +13,33 @@ use crate::error::SessionError;
 
 #[derive(Clone, Debug)]
 pub struct Session {
-    pub client_id: String,
-    pub client_secret: String,
+    client_id: String,
+    client_secret: String,
 }
 
 impl Session {
     pub fn new() -> Self {
         Session {
-            client_id: String::from("37b03bd9f3fa8ba93bc2736ef348fec878949ae649543d8cf0ea15c6743da0e3"),
-            client_secret: String::from("f9d31d50bd7fcdb68f83dfd961ba4184681f7baab8d0d8d8427c156a1fc1a733"),
+            client_id: String::from(
+                "37b03bd9f3fa8ba93bc2736ef348fec878949ae649543d8cf0ea15c6743da0e3",
+            ),
+            client_secret: String::from(
+                "f9d31d50bd7fcdb68f83dfd961ba4184681f7baab8d0d8d8427c156a1fc1a733",
+            ),
         }
+    }
+    pub fn get_client_id(&self) -> &str {
+        self.client_id.as_str()
+    }
+    pub fn get_client_secret(&self) -> &str {
+        self.client_secret.as_str()
     }
 }
 
 pub async fn generate_token(session: Session) -> Result<String, SessionError> {
-    let client_id = session.client_id.to_owned();
-    let client_secret = session.client_secret.to_owned();
     let client = BasicClient::new(
-        ClientId::new(client_id.to_owned()),
-        Some(ClientSecret::new(client_secret)),
+        ClientId::new(String::from(session.get_client_id())),
+        Some(ClientSecret::new(String::from(session.get_client_secret()))),
         AuthUrl::new("https://api.intra.42.fr/oauth/authorize".to_string())?,
         Some(TokenUrl::new(
             "https://api.intra.42.fr/oauth/token".to_string(),

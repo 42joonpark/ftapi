@@ -8,6 +8,8 @@ pub enum SessionError {
     ParseUrlError(#[from] url::ParseError),
     #[error(transparent)]
     ReqwestError(#[from] reqwest::Error),
+    #[error(transparent)]
+    JsonError(#[from] serde_json::Error),
     #[error("Error: Not valide token Error")]
     TokenNotValid,
     #[error("Error: NoneError")]

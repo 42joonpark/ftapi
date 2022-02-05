@@ -1,8 +1,8 @@
-use crate::SessionError;
+use crate::error::SessionError;
 use clap::{crate_description, crate_name, crate_version, App, Arg};
 
 pub struct Config {
-	pub command: String,
+    pub command: String,
     pub list_commands: bool,
     pub page: Option<u32>,
 }

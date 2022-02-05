@@ -1,35 +1,37 @@
-pub mod cli;
-pub mod error;
-pub mod token;
-pub mod authorize;
-use reqwest::header::AUTHORIZATION;
-use authorize::{Session, generate_token};
-use token::{TokenInfo, check_token_valide};
-use cli::{Config, list_available_commands};
+use ftapi::authorize::{generate_token, Session};
+use ftapi::cli::{list_available_commands, Config};
+use ftapi::error::SessionError;
+use ftapi::structs::me;
+use ftapi::token::{check_token_valide, TokenInfo};
 use log::{self, debug, info, warn};
-use error::SessionError;
+use reqwest::header::AUTHORIZATION;
 
 async fn run(prog: &mut Program, config: Config) -> Result<(), SessionError> {
     let command = config.command.to_owned();
     // let cmd = command.trim().to_uppercase();
-    let res = prog.call("v2/me").await?;
-    println!("{:#?}", res);
+    let cmd = command.trim().to_uppercase();
+    match cmd.as_str() {
+        "ID" => prog.id().await?,
+        "ME" => prog.me().await?,
+        "EMAIL" => prog.email().await?,
+        "LOGIN" => prog.login().await?,
+        "POINT" => prog.correction_point().await?,
+        "WALLET" => prog.wallet().await?,
+        _ => println!("Command `{}` not found", command),
+    }
+    // let res = prog.call("v2/me").await?;
+    // println!("{:#?}", res);
     Ok(())
 }
 
 struct Program {
     session: Session,
     access_token: Option<String>,
+    #[allow(dead_code)]
     token: Option<TokenInfo>,
 }
 
 impl Program {
-    pub fn get_access_token(&self) -> &str {
-        match &self.access_token {
-            Some(token) => token,
-            None => "",
-        }
-    }
     fn new() -> Self {
         Program {
             session: Session::new(),
@@ -38,21 +40,26 @@ impl Program {
             token: None,
         }
     }
+    pub fn get_access_token(&self) -> &str {
+        match &self.access_token {
+            Some(token) => token,
+            None => "",
+        }
+    }
 
     async fn call(&mut self, uri: &str) -> Result<String, SessionError> {
         info!("call() Begin");
-        // self.access_token = Some(generate_token(self.session.to_owned()).await?);
+        self.access_token = Some(generate_token(self.session.to_owned()).await?);
         let res = check_token_valide(self.get_access_token()).await;
         if let Ok(false) = res {
-            warn!("Token is not valid, please login again");
+            println!("Token is not valid, please check access token.");
             return Err(SessionError::TokenNotValid);
         }
-        let ac_token = self.access_token.as_ref().unwrap();
-        let client_id = self.session.client_id.to_owned();
+        let ac_token = self.get_access_token();
         let client = reqwest::Client::new();
         let params = [
             ("grant_type", "client_credentials"),
-            ("client_id", client_id.as_str()),
+            ("client_id", self.session.get_client_id()),
         ];
         let response = client
             .get(format!("https://api.intra.42.fr/{}", uri))
@@ -84,6 +91,60 @@ impl Program {
         let tmp = response.text().await?;
         info!("call() End");
         Ok(tmp)
+    }
+}
+
+impl Program {
+    async fn get_me(&mut self) -> Result<me::Me, SessionError> {
+        info!("get_me() Begin");
+        let res = self.call("v2/me").await?;
+        let me: me::Me = serde_json::from_str(res.as_str())?;
+        info!("get_me() End");
+        Ok(me)
+    }
+
+    pub async fn me(&mut self) -> Result<(), SessionError> {
+        let m = self.get_me().await?;
+        let title = if m.titles.is_empty() {
+            ""
+        } else {
+            m.titles[0].name.split(' ').next().unwrap_or("")
+        };
+        println!("{} | {} {}", m.displayname, title, m.login);
+        println!("{:20}{}", "Wallet", m.wallet);
+        println!("{:20}{}", "Evaluation points", m.correction_point);
+        println!("{:20}{}", "Cursus", m.cursus_users[1].cursus.name);
+        Ok(())
+    }
+
+    pub async fn email(&mut self) -> Result<(), SessionError> {
+        let m = self.get_me().await?;
+        println!("{:20}{}", "Email", m.email);
+        Ok(())
+    }
+
+    pub async fn wallet(&mut self) -> Result<(), SessionError> {
+        let m = self.get_me().await?;
+        println!("{:20}{}", "Wallet", m.wallet);
+        Ok(())
+    }
+
+    pub async fn id(&mut self) -> Result<(), SessionError> {
+        let m = self.get_me().await?;
+        println!("{:20}{}", "ID", m.id);
+        Ok(())
+    }
+
+    pub async fn login(&mut self) -> Result<(), SessionError> {
+        let m = self.get_me().await?;
+        println!("{:20}{}", "Login", m.login);
+        Ok(())
+    }
+
+    pub async fn correction_point(&mut self) -> Result<(), SessionError> {
+        let m = self.get_me().await?;
+        println!("{:20}{}", "Correction point", m.correction_point);
+        Ok(())
     }
 }
 
