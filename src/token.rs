@@ -1,3 +1,4 @@
+use crate::error::SessionError;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -24,7 +25,7 @@ pub struct Application {
     pub uid: Option<String>,
 }
 
-pub async fn token_info(token: &str) -> Result<TokenInfo, Box<dyn std::error::Error>> {
+pub async fn token_info(token: &str) -> Result<TokenInfo, SessionError> {
     let url = format!(
         "https://api.intra.42.fr/oauth/token/info?access_token={}",
         token
@@ -34,7 +35,7 @@ pub async fn token_info(token: &str) -> Result<TokenInfo, Box<dyn std::error::Er
     Ok(token_info)
 }
 
-pub async fn check_token_valide(token: &str) -> Result<bool, Box<dyn std::error::Error>> {
+pub async fn check_token_valide(token: &str) -> Result<bool, SessionError> {
     let token_info = token_info(token).await?;
     if token_info.expires_in_seconds.is_none() {
         return Ok(false);

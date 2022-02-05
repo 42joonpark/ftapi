@@ -23,7 +23,7 @@ async fn run(prog: &mut Program, config: Config) -> Result<(), SessionError> {
 
 struct Program {
     session: Session,
-    access_token: Option<String>,
+    // access_token: Option<String>,
     #[allow(dead_code)]
     token: Option<TokenInfo>,
 }
@@ -32,21 +32,20 @@ impl Program {
     fn new() -> Result<Self, SessionError> {
         Ok(Program {
             session: Session::new()?,
-            access_token: None,
-            // access_token: Some(String::from("Some Valid Access Token")),
+            // access_token: None,
             token: None,
         })
     }
     pub fn get_access_token(&self) -> &str {
-        match &self.access_token {
-            Some(token) => token,
-            None => "",
-        }
+        self.session.get_access_token()
     }
 
     async fn call(&mut self, uri: &str) -> Result<String, SessionError> {
         info!("call() Begin");
-        self.access_token = Some(generate_token(self.session.to_owned()).await?);
+        if !(check_token_valide(self.get_access_token()).await?) {
+            let token = generate_token(self.session.clone()).await?;
+            self.session.set_access_token(token);
+        }
         let res = check_token_valide(self.get_access_token()).await;
         if let Ok(false) = res {
             println!("Token is not valid, please check access token.");

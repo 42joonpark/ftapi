@@ -10,6 +10,8 @@ pub enum SessionError {
     ReqwestError(#[from] reqwest::Error),
     #[error(transparent)]
     JsonError(#[from] serde_json::Error),
+    #[error("Error: toml Error")]
+    TomlError(#[from] toml::de::Error),
     #[error("Error: Not valide token Error")]
     TokenNotValid,
     #[error("Error: NoneError")]

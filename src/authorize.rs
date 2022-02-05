@@ -5,35 +5,44 @@ use oauth2::{
     AuthUrl, AuthorizationCode, ClientId, ClientSecret, CsrfToken, RedirectUrl, Scope,
     TokenResponse, TokenUrl,
 };
+use serde::Deserialize;
+use std::fs;
 use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
 use tokio::net::TcpListener;
 use url::Url;
 
 use crate::error::SessionError;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, Deserialize)]
 pub struct Session {
     client_id: String,
     client_secret: String,
+    access_token: Option<String>,
 }
 
 impl Session {
     pub fn new() -> Result<Self, SessionError> {
-        // 여기서 읽어서 한다면?
-        Ok(Session {
-            client_id: String::from(
-                "37b03bd9f3fa8ba93bc2736ef348fec878949ae649543d8cf0ea15c6743da0e3",
-            ),
-            client_secret: String::from(
-                "f9d31d50bd7fcdb68f83dfd961ba4184681f7baab8d0d8d8427c156a1fc1a733",
-            ),
-        })
+        let path = "./config.toml";
+        let content = fs::read_to_string(path)?;
+        Ok(toml::from_str(&content)?)
     }
     pub fn get_client_id(&self) -> &str {
         self.client_id.as_str()
     }
     pub fn get_client_secret(&self) -> &str {
         self.client_secret.as_str()
+    }
+    pub fn get_access_token(&self) -> &str {
+        match &self.access_token {
+            Some(token) => token,
+            None => "",
+        }
+    }
+    pub fn set_access_token(&mut self, token: String) {
+        self.access_token = Some(token);
+    }
+    pub fn update_access_token(&mut self, token: String) {
+        self.access_token = Some(token);
     }
 }
 
