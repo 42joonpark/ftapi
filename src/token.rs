@@ -42,7 +42,6 @@ pub async fn check_token_valide(token: &str) -> Result<bool, Box<dyn std::error:
     Ok(true)
 }
 
-
 #[tokio::test]
 async fn token_info_fail_test() {
     let res = token_info("not working token").await;
