@@ -11,17 +11,37 @@ use url::Url;
 
 use crate::error::SessionError;
 
+#[derive(Clone, Debug, Default)]
 pub struct Session {
-    pub client_id: String,
-    pub client_secret: String,
+    client_id: String,
+    client_secret: String,
+}
+
+impl Session {
+    pub fn new() -> Result<Self, SessionError> {
+        // TODO
+        // read config file and set client_id and client_secret
+        Ok(Session {
+            client_id: String::from(
+                "",
+            ),
+            client_secret: String::from(
+                "",
+            ),
+        })
+    }
+    pub fn get_client_id(&self) -> &str {
+        self.client_id.as_str()
+    }
+    pub fn get_client_secret(&self) -> &str {
+        self.client_secret.as_str()
+    }
 }
 
 pub async fn generate_token(session: Session) -> Result<String, SessionError> {
-    let client_id = session.client_id.to_owned();
-    let client_secret = session.client_secret.to_owned();
     let client = BasicClient::new(
-        ClientId::new(client_id.to_owned()),
-        Some(ClientSecret::new(client_secret)),
+        ClientId::new(String::from(session.get_client_id())),
+        Some(ClientSecret::new(String::from(session.get_client_secret()))),
         AuthUrl::new("https://api.intra.42.fr/oauth/authorize".to_string())?,
         Some(TokenUrl::new(
             "https://api.intra.42.fr/oauth/token".to_string(),
