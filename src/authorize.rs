@@ -16,7 +16,7 @@ pub struct Session {
     pub client_secret: String,
 }
 
-pub async fn my_authorize(session: Session) -> Result<String, SessionError> {
+pub async fn generate_token(session: Session) -> Result<String, SessionError> {
     let client_id = session.client_id.to_owned();
     let client_secret = session.client_secret.to_owned();
     let client = BasicClient::new(
@@ -96,7 +96,7 @@ async fn local_server(client: BasicClient) -> Result<String, SessionError> {
                 .request_async(async_http_client)
                 .await;
             let token = match token_res {
-                Err(_) => return Err(SessionError::ServerUnauthorized),
+                Err(_) => return Err(SessionError::UnauthorizedServerError),
                 Ok(t) => t,
             };
             debug!("42API returned the following token:\n{:?}\n", token);
@@ -118,3 +118,19 @@ async fn local_server(client: BasicClient) -> Result<String, SessionError> {
     }
     Ok(ac_token)
 }
+
+/*
+#[tokio::test]
+async fn authorize_test() {
+    // Don't forget to test with --nocapture option
+    let res = generate_token(Session {
+        client_id: "YOUR CLIENT_ID".to_string(),
+        client_secret: "YOUR CLIENT SECRET"
+            .to_string(),
+    })
+    .await;
+    if let Ok(t) = res {
+        assert_ne!(t, "".to_string());
+    }
+}
+*/
