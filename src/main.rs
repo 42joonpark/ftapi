@@ -1,8 +1,11 @@
-use ftapi::authorize::{generate_token, Session};
+use ftapi::authorize::generate_token;
 use ftapi::cli::{list_available_commands, Config};
 use ftapi::error::SessionError;
-use ftapi::structs::me;
-use ftapi::token::{check_token_valide, TokenInfo};
+use ftapi::session::Session;
+use ftapi::structs::{
+    me,
+    token::{check_token_valide, TokenInfo},
+};
 use log::{self, debug, info, warn};
 use reqwest::header::AUTHORIZATION;
 
