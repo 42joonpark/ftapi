@@ -32,11 +32,8 @@ impl Session {
     pub fn get_client_secret(&self) -> &str {
         self.client_secret.as_str()
     }
-    pub fn get_access_token(&self) -> &str {
-        match &self.access_token {
-            Some(token) => token,
-            None => "",
-        }
+    pub fn get_access_token(&self) -> Option<String> {
+        self.access_token.clone()
     }
     pub fn set_access_token(&mut self, token: String) {
         self.access_token = Some(token);

@@ -25,17 +25,17 @@ pub struct Application {
     pub uid: Option<String>,
 }
 
-pub async fn token_info(token: &str) -> Result<TokenInfo, SessionError> {
+pub async fn token_info(token: Option<String>) -> Result<TokenInfo, SessionError> {
     let url = format!(
         "https://api.intra.42.fr/oauth/token/info?access_token={}",
-        token
+        token.unwrap_or_default()
     );
     let resp = reqwest::get(&url).await?;
     let token_info: TokenInfo = resp.json().await?;
     Ok(token_info)
 }
 
-pub async fn check_token_valide(token: &str) -> Result<bool, SessionError> {
+pub async fn check_token_valide(token: Option<String>) -> Result<bool, SessionError> {
     let token_info = token_info(token).await?;
     if token_info.expires_in_seconds.is_none() {
         return Ok(false);
@@ -45,7 +45,8 @@ pub async fn check_token_valide(token: &str) -> Result<bool, SessionError> {
 
 #[tokio::test]
 async fn token_info_fail_test() {
-    let res = token_info("not working token").await;
+    let res = token_info(Some("not working token".to_string())).await;
+    // let res = token_info(None).await;
     if let Ok(token_info) = res {
         println!("{:?}", token_info); // cargo run test -- --nocapture
         assert_eq!(token_info.application.is_none(), true);
@@ -67,7 +68,8 @@ async fn token_info_success_test() {
 
 #[tokio::test]
 async fn check_token_valide_fail_test() {
-    let res = check_token_valide("not working token").await;
+    let res = check_token_valide(Some("not working token".to_string())).await;
+    // let res = check_token_valide(None).await;
     if let Ok(t) = res {
         assert_eq!(t, false);
     }

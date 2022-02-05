@@ -36,7 +36,7 @@ impl Program {
             token: None,
         })
     }
-    pub fn get_access_token(&self) -> &str {
+    pub fn get_access_token(&self) -> Option<String> {
         self.session.get_access_token()
     }
 
@@ -45,13 +45,12 @@ impl Program {
         if !(check_token_valide(self.get_access_token()).await?) {
             let token = generate_token(self.session.clone()).await?;
             self.session.set_access_token(token);
+            if let Ok(false) = check_token_valide(self.get_access_token()).await {
+                println!("Token is not valid, please check access token.");
+                return Err(SessionError::TokenNotValid);
+            }
         }
-        let res = check_token_valide(self.get_access_token()).await;
-        if let Ok(false) = res {
-            println!("Token is not valid, please check access token.");
-            return Err(SessionError::TokenNotValid);
-        }
-        let ac_token = self.get_access_token();
+        let ac_token = self.get_access_token().unwrap_or_default();
         let client = reqwest::Client::new();
         let params = [
             ("grant_type", "client_credentials"),
