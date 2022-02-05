@@ -8,7 +8,6 @@ use reqwest::header::AUTHORIZATION;
 
 async fn run(prog: &mut Program, config: Config) -> Result<(), SessionError> {
     let command = config.command.to_owned();
-    // let cmd = command.trim().to_uppercase();
     let cmd = command.trim().to_uppercase();
     match cmd.as_str() {
         "ID" => prog.id().await?,
@@ -19,8 +18,6 @@ async fn run(prog: &mut Program, config: Config) -> Result<(), SessionError> {
         "WALLET" => prog.wallet().await?,
         _ => println!("Command `{}` not found", command),
     }
-    // let res = prog.call("v2/me").await?;
-    // println!("{:#?}", res);
     Ok(())
 }
 
@@ -32,13 +29,13 @@ struct Program {
 }
 
 impl Program {
-    fn new() -> Self {
-        Program {
-            session: Session::new(),
+    fn new() -> Result<Self, SessionError> {
+        Ok(Program {
+            session: Session::new()?,
             access_token: None,
             // access_token: Some(String::from("Some Valid Access Token")),
             token: None,
-        }
+        })
     }
     pub fn get_access_token(&self) -> &str {
         match &self.access_token {
@@ -155,7 +152,7 @@ async fn main() -> Result<(), SessionError> {
     if config.list_commands {
         return list_available_commands();
     }
-    let mut prog = Program::new();
+    let mut prog = Program::new()?;
     run(&mut prog, config).await?;
     Ok(())
 }

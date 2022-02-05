@@ -11,22 +11,23 @@ use url::Url;
 
 use crate::error::SessionError;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct Session {
     client_id: String,
     client_secret: String,
 }
 
 impl Session {
-    pub fn new() -> Self {
-        Session {
+    pub fn new() -> Result<Self, SessionError> {
+        // 여기서 읽어서 한다면?
+        Ok(Session {
             client_id: String::from(
                 "37b03bd9f3fa8ba93bc2736ef348fec878949ae649543d8cf0ea15c6743da0e3",
             ),
             client_secret: String::from(
                 "f9d31d50bd7fcdb68f83dfd961ba4184681f7baab8d0d8d8427c156a1fc1a733",
             ),
-        }
+        })
     }
     pub fn get_client_id(&self) -> &str {
         self.client_id.as_str()
