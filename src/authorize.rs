@@ -22,12 +22,8 @@ impl Session {
         // TODO
         // read config file and set client_id and client_secret
         Ok(Session {
-            client_id: String::from(
-                "",
-            ),
-            client_secret: String::from(
-                "",
-            ),
+            client_id: String::from(""),
+            client_secret: String::from(""),
         })
     }
     pub fn get_client_id(&self) -> &str {
