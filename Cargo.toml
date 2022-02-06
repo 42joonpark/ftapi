@@ -5,6 +5,7 @@ edition = "2021"
 authors = ["bagmeg"]
 license = "Apache-2.0"
 readme = "README.md"
+documentation = "https://docs.rs/env_logger"
 repository = "https://github.com/bagmeg/ftapi"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
