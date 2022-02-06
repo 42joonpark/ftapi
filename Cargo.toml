@@ -5,7 +5,7 @@ edition = "2021"
 authors = ["bagmeg"]
 license = "Apache-2.0"
 readme = "README.md"
-documentation = "https://docs.rs/env_logger"
+documentation = "https://docs.rs/ftapi"
 repository = "https://github.com/bagmeg/ftapi"
 description = "For 42 API users"
 
