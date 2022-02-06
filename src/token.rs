@@ -24,16 +24,16 @@ pub struct TokenInfo {
     pub expires_in_seconds: Option<i64>,
 
     #[serde(rename = "application")]
-    pub application: Option<Application>,
+    application: Option<Application>,
 
     #[serde(rename = "created_at")]
     pub created_at: Option<i64>,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
-pub struct Application {
+struct Application {
     #[serde(rename = "uid")]
-    pub uid: Option<String>,
+    uid: Option<String>,
 }
 
 pub async fn token_info(token: Option<String>) -> Result<TokenInfo, SessionError> {
