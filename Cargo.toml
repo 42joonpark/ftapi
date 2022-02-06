@@ -8,6 +8,10 @@ readme = "README.md"
 documentation = "https://docs.rs/env_logger"
 repository = "https://github.com/bagmeg/ftapi"
 
+exclude = [
+	"config.toml",
+]
+
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
