@@ -1,7 +1,8 @@
 use ftapi::cli::{list_available_commands, Config};
-use ftapi::error::SessionError;
-use ftapi::session::Session;
-use ftapi::structs::{me, token::TokenInfo};
+use ftapi::SessionError;
+use ftapi::Session;
+use ftapi::TokenInfo;
+use ftapi::results::me;
 use log::{self, info};
 
 async fn run(prog: &mut Program, config: Config) -> Result<(), SessionError> {

@@ -1,4 +1,5 @@
-use crate::error::SessionError;
+// use crate::error::SessionError;
+use crate::SessionError;
 use clap::{crate_description, crate_name, crate_version, App, Arg};
 
 pub struct Config {
