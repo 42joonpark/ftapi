@@ -7,7 +7,7 @@ license = "Apache-2.0"
 readme = "README.md"
 documentation = "https://docs.rs/env_logger"
 repository = "https://github.com/bagmeg/ftapi"
-description = ""
+description = "For 42 API users"
 
 exclude = [
 	"config.toml",
