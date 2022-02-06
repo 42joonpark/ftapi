@@ -1,13 +1,8 @@
-use ftapi::authorize::generate_token;
 use ftapi::cli::{list_available_commands, Config};
 use ftapi::error::SessionError;
 use ftapi::session::Session;
-use ftapi::structs::{
-    me,
-    token::{check_token_valide, TokenInfo},
-};
-use log::{self, debug, info, warn};
-use reqwest::header::AUTHORIZATION;
+use ftapi::structs::{me, token::TokenInfo};
+use log::{self, info};
 
 async fn run(prog: &mut Program, config: Config) -> Result<(), SessionError> {
     let command = config.command.to_owned();
@@ -39,56 +34,10 @@ impl Program {
             token: None,
         })
     }
-    pub fn get_access_token(&self) -> Option<String> {
-        self.session.get_access_token()
-    }
 
     async fn call(&mut self, uri: &str) -> Result<String, SessionError> {
-        info!("call() Begin");
-        if !(check_token_valide(self.get_access_token()).await?) {
-            let token = generate_token(self.session.clone()).await?;
-            self.session.set_access_token(token);
-            if let Ok(false) = check_token_valide(self.get_access_token()).await {
-                println!("Token is not valid, please check access token.");
-                return Err(SessionError::TokenNotValid);
-            }
-        }
-        let ac_token = self.get_access_token().unwrap_or_default();
-        let client = reqwest::Client::new();
-        let params = [
-            ("grant_type", "client_credentials"),
-            ("client_id", self.session.get_client_id()),
-        ];
-        let response = client
-            .get(format!("https://api.intra.42.fr/{}", uri))
-            .header(AUTHORIZATION, format!("Bearer {}", ac_token))
-            .form(&params)
-            .send()
-            .await?;
-
-        match response.status() {
-            reqwest::StatusCode::OK => {
-                debug!("call(): reqwest OK");
-            }
-            reqwest::StatusCode::UNAUTHORIZED => {
-                warn!("call(): unauthorized");
-                return Err(SessionError::UnauthorizedServerError);
-            }
-            reqwest::StatusCode::FORBIDDEN => {
-                warn!("call(): 402 FORBIDDEN ACCESS");
-                return Err(SessionError::Fobidden);
-            }
-            reqwest::StatusCode::NOT_FOUND => {
-                warn!("404 NOT FOUND");
-                return Err(SessionError::NotFound);
-            }
-            _ => {
-                panic!("uh oh! something unexpected happened");
-            }
-        }
-        let tmp = response.text().await?;
-        info!("call() End");
-        Ok(tmp)
+        let res = self.session.call(uri).await?;
+        Ok(res)
     }
 }
 
@@ -148,7 +97,7 @@ impl Program {
 
 #[tokio::main]
 async fn main() -> Result<(), SessionError> {
-    info!("main() Begin");
+    env_logger::init();
     let config = Config::new()?;
     if config.list_commands {
         return list_available_commands();
