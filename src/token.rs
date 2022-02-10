@@ -36,13 +36,19 @@ struct Application {
     uid: Option<String>,
 }
 
+/// Try to get access token info.
+/// 
+/// # Example
+/// ```
+/// let token_info: TokenInfo = token_info("access token");
+/// ```
 pub async fn token_info(token: Option<String>) -> Result<TokenInfo, SessionError> {
     let url = format!(
         "https://api.intra.42.fr/oauth/token/info?access_token={}",
         token.unwrap_or_default()
     );
     let resp = reqwest::get(&url).await?;
-    let token_info: TokenInfo = resp.json().await?;
+    let token_info= resp.json::<TokenInfo>().await?;
     Ok(token_info)
 }
 
@@ -98,6 +104,40 @@ async fn check_token_valide_success_test() {
     }
 }
 */
+
+#[derive(Deserialize, Debug)]
+pub struct AccessToken {
+    pub access_token: String,
+    pub token_type: String,
+    pub expires_in: i32,
+    pub scope: String,
+    pub created_at: i64,
+}
+
+pub async fn generate_token_credentials(session: Session) -> Result<String, SessionError> {
+    let client_id = session.client_id.to_owned();
+    let client_secret = session.client_secret.to_owned();
+    let params = [
+        ("grant_type", "client_credentials"),
+        ("client_id", client_id.as_str()),
+        ("client_secret", client_secret.as_str()),
+    ];
+    let client = reqwest::Client::new();
+    let response = client
+        .post("https://api.intra.42.fr/oauth/token")
+        .form(&params)
+        .send()
+        .await;
+
+    if let Ok(res) = response {
+        match res.json::<AccessToken>().await {
+            Ok(token) => Ok(token.access_token),
+            Err(e) => Err(SessionError::ReqwestError(e)),
+        }
+    } else {
+        Err(SessionError::NoneError)
+    }
+}
 
 pub async fn generate_token(session: Session) -> Result<String, SessionError> {
     let client = BasicClient::new(
