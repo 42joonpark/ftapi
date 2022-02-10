@@ -37,7 +37,7 @@ struct Application {
 }
 
 /// Try to get access token info.
-/// 
+///
 /// # Example
 /// ```
 /// let token_info: TokenInfo = token_info("access token");
@@ -48,7 +48,7 @@ pub async fn token_info(token: Option<String>) -> Result<TokenInfo, SessionError
         token.unwrap_or_default()
     );
     let resp = reqwest::get(&url).await?;
-    let token_info= resp.json::<TokenInfo>().await?;
+    let token_info = resp.json::<TokenInfo>().await?;
     Ok(token_info)
 }
 

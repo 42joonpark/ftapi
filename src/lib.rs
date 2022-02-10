@@ -8,7 +8,6 @@ use serde::Deserialize;
 use std::fs;
 use thiserror::Error;
 
-
 #[derive(Error, Debug)]
 pub enum SessionError {
     #[error(transparent)]
