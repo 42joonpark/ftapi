@@ -30,3 +30,4 @@ log = { version = "0.4.14" }
 url = { version = "2.2.2" }
 oauth2 = { version = "4.1.0" }
 toml = { version = "0.5.8" }
+directories = { version = "4.0.1" }
