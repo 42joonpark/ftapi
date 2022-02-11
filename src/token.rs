@@ -43,11 +43,9 @@ struct Application {
 /// let token_info: TokenInfo = token_info("Some Token");
 /// ```
 pub async fn token_info(token: Option<String>) -> Result<TokenInfo, SessionError> {
-    let url = format!(
-        "https://api.intra.42.fr/oauth/token/info?access_token={}",
-        token.unwrap_or_default()
-    );
-    let resp = reqwest::get(&url).await?;
+    let url = "https://api.intra.42.fr/oauth/token/info";
+    let url = Url::parse_with_params(url, &[("access_token", token.unwrap_or_default())])?;
+    let resp = reqwest::get(url).await?;
     let token_info = resp.json::<TokenInfo>().await?;
     Ok(token_info)
 }
@@ -75,12 +73,12 @@ pub struct AccessToken {
     pub created_at: i64,
 }
 
-/// Generate credential grant token.
+/// Generate credentials grant token.
 ///
 /// # Example
 ///
 /// ```
-/// let session = Session::new(Some(Mode::Credential)).await?;
+/// let session = Session::new(Some(Mode::Credentials)).await?;
 /// let access_token = generate_token_credentials(session.clone()).await?;
 /// ```
 pub async fn generate_token_credentials(session: Session) -> Result<String, SessionError> {
