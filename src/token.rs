@@ -40,7 +40,7 @@ struct Application {
 ///
 /// # Example
 /// ```
-/// let token_info: TokenInfo = token_info("access token");
+/// let token_info: TokenInfo = token_info("Some Token");
 /// ```
 pub async fn token_info(token: Option<String>) -> Result<TokenInfo, SessionError> {
     let url = format!(
@@ -52,6 +52,12 @@ pub async fn token_info(token: Option<String>) -> Result<TokenInfo, SessionError
     Ok(token_info)
 }
 
+/// Check if the token is valid.
+/// 
+/// # Example
+/// ```
+/// let res = check_token_valide(Some("Some Token".to_string())).await; 
+/// ```
 pub async fn check_token_valide(token: Option<String>) -> Result<bool, SessionError> {
     let token_info = token_info(token).await?;
     if token_info.expires_in_seconds.is_none() {
@@ -59,51 +65,6 @@ pub async fn check_token_valide(token: Option<String>) -> Result<bool, SessionEr
     }
     Ok(true)
 }
-
-#[tokio::test]
-async fn token_info_fail_test() {
-    let res = token_info(Some("not working token".to_string())).await;
-    // let res = token_info(None).await;
-    if let Ok(token_info) = res {
-        println!("{:?}", token_info); // cargo run test -- --nocapture
-        assert_eq!(token_info.application.is_none(), true);
-    }
-}
-
-/*
-#[tokio::test]
-async fn token_info_success_test() {
-    let res =
-        token_info("Some Working Token")
-            .await;
-    if let Ok(token_info) = res {
-        println!("{:?}", token_info);
-        assert_eq!(token_info.application.is_none(), false);
-    }
-}
-*/
-
-#[tokio::test]
-async fn check_token_valide_fail_test() {
-    let res = check_token_valide(Some("not working token".to_string())).await;
-    // let res = check_token_valide(None).await;
-    if let Ok(t) = res {
-        assert_eq!(t, false);
-    }
-}
-
-/*
-#[tokio::test]
-async fn check_token_valide_success_test() {
-    let res = check_token_valide(
-        "Some Working Token",
-    )
-    .await;
-    if let Ok(t) = res {
-        assert_eq!(t, true);
-    }
-}
-*/
 
 #[derive(Deserialize, Debug)]
 pub struct AccessToken {
@@ -114,6 +75,14 @@ pub struct AccessToken {
     pub created_at: i64,
 }
 
+/// Generate credential grant token.
+/// 
+/// # Example
+/// 
+/// ```
+/// let session = Session::new(Some(Mode::Credential)).await?;
+/// let access_token = generate_token_credentials(session.clone()).await?;
+/// ```
 pub async fn generate_token_credentials(session: Session) -> Result<String, SessionError> {
     let client_id = session.client_id.to_owned();
     let client_secret = session.client_secret.to_owned();
@@ -239,6 +208,56 @@ async fn local_server(client: BasicClient) -> Result<String, SessionError> {
     }
     Ok(ac_token)
 }
+
+
+// *************************************************************************
+//                                   Test
+// *************************************************************************
+
+#[tokio::test]
+async fn token_info_fail_test() {
+    let res = token_info(Some("not working token".to_string())).await;
+    // let res = token_info(None).await;
+    if let Ok(token_info) = res {
+        println!("{:?}", token_info); // cargo run test -- --nocapture
+        assert_eq!(token_info.application.is_none(), true);
+    }
+}
+
+/*
+#[tokio::test]
+async fn token_info_success_test() {
+    let res =
+        token_info("Some Working Token")
+            .await;
+    if let Ok(token_info) = res {
+        println!("{:?}", token_info);
+        assert_eq!(token_info.application.is_none(), false);
+    }
+}
+*/
+
+#[tokio::test]
+async fn check_token_valide_fail_test() {
+    let res = check_token_valide(Some("not working token".to_string())).await;
+    // let res = check_token_valide(None).await;
+    if let Ok(t) = res {
+        assert_eq!(t, false);
+    }
+}
+
+/*
+#[tokio::test]
+async fn check_token_valide_success_test() {
+    let res = check_token_valide(
+        "Some Working Token",
+    )
+    .await;
+    if let Ok(t) = res {
+        assert_eq!(t, true);
+    }
+}
+*/
 
 /*
 #[tokio::test]

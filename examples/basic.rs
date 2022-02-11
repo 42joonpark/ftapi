@@ -1,9 +1,8 @@
 use ftapi::results::{me, user};
-use ftapi::token::generate_token_credentials;
-use ftapi::token::{AccessToken, TokenInfo};
+use ftapi::token::{TokenInfo};
 use ftapi::Session;
+use ftapi::Mode;
 use ftapi::SessionError;
-use log::{debug, info, warn};
 use url::Url;
 
 struct Program {
@@ -14,21 +13,19 @@ struct Program {
 }
 
 impl Program {
-    fn new() -> Result<Self, SessionError> {
+    async fn new() -> Result<Self, SessionError> {
         Ok(Program {
-            session: Session::new("config.toml")?,
-            // access_token: None,
+            /// use Some(Mode::Code) for code grant
+            /// use Some(Mode::Credential) or None for credential grant
+
+            // session: Session::new(Some(Mode::Code)).await?,
+            session: Session::new(Some(Mode::Credential)).await?,
             token: None,
         })
     }
 
     async fn call(&mut self, uri: &str) -> Result<String, SessionError> {
-        let res = self.session.call_credentials(uri).await?;
-        Ok(res)
-    }
-
-    async fn call_credentials(&mut self, url: &str) -> Result<String, SessionError> {
-        let res = self.session.call_credentials(url).await?;
+        let res = self.session.call(uri).await?;
         Ok(res)
     }
 }
@@ -44,7 +41,7 @@ impl Program {
             ],
         )?;
 
-        let res = self.call_credentials(url.as_str()).await?;
+        let res = self.call(url.as_str()).await?;
         let user: user::User = serde_json::from_str(res.as_str())?;
         Ok(user[0].clone())
     }
@@ -53,7 +50,7 @@ impl Program {
         let url = format!("https://api.intra.42.fr/v2/users/{}", id);
         let url = Url::parse_with_params(&url, &[("client_id", self.session.get_client_id())])?;
 
-        let res = self.call_credentials(url.as_str()).await?;
+        let res = self.call(url.as_str()).await?;
         let me: me::Me = serde_json::from_str(res.as_str())?;
         Ok(me)
     }
@@ -115,8 +112,8 @@ impl Program {
 
 #[tokio::main]
 async fn main() -> Result<(), SessionError> {
-    let mut prog = Program::new()?;
-    prog.session.generate_token().await?;
+    let mut prog = Program::new().await?;
+    // prog.session.generate_token().await?;
     prog.me().await?;
     Ok(())
 }
