@@ -1,4 +1,4 @@
-use ftapi::token::{token_info, check_token_valide};
+use ftapi::token::{check_token_valide, token_info};
 
 #[tokio::test]
 async fn token_info_fail_test() {
