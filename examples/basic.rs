@@ -1,7 +1,7 @@
 use ftapi::results::{me, user};
-use ftapi::token::{TokenInfo};
-use ftapi::Session;
+use ftapi::token::TokenInfo;
 use ftapi::Mode;
+use ftapi::Session;
 use ftapi::SessionError;
 use url::Url;
 
@@ -72,14 +72,35 @@ impl Program {
         Ok(())
     }
 
-    /*
+    #[allow(dead_code)]
+    pub async fn me_code(&mut self) -> Result<(), SessionError> {
+        let url = "https://api.intra.42.fr/v2/me";
+        let url = Url::parse_with_params(&url, &[("client_id", self.session.get_client_id())])?;
+
+        let res = self.call(url.as_str()).await?;
+        let m: me::Me = serde_json::from_str(res.as_str())?;
+        let title = if m.titles.is_empty() {
+            ""
+        } else {
+            m.titles[0].name.split(' ').next().unwrap_or("")
+        };
+        println!("{} | {} {}", m.displayname, title, m.login);
+        println!("{:20}{}", "Wallet", m.wallet);
+        println!("{:20}{}", "Evaluation points", m.correction_point);
+        println!("{:20}{}", "Cursus", m.cursus_users[1].cursus.name);
+        Ok(())
+    }
+
     #[allow(dead_code)]
     pub async fn email(&mut self) -> Result<(), SessionError> {
-        let m = self.get_me().await?;
+        let tmp = self.get_user_with_login().await?;
+        let id = tmp.id;
+        let m = self.get_me(id).await?;
         println!("{:20}{}", "Email", m.email);
         Ok(())
     }
 
+    /*
     #[allow(dead_code)]
     pub async fn wallet(&mut self) -> Result<(), SessionError> {
         let m = self.get_me().await?;
@@ -112,8 +133,9 @@ impl Program {
 
 #[tokio::main]
 async fn main() -> Result<(), SessionError> {
+    env_logger::init();
     let mut prog = Program::new().await?;
-    // prog.session.generate_token().await?;
+    prog.email().await?;
     prog.me().await?;
     Ok(())
 }

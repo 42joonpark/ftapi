@@ -1,13 +1,12 @@
 pub mod results;
 pub mod token;
 
-use crate::token::{generate_token, generate_token_credentials};
+use directories::BaseDirs;
 use log::{self, debug, warn};
 use reqwest::header::AUTHORIZATION;
 use serde::Deserialize;
 use std::fs;
 use thiserror::Error;
-use directories::BaseDirs;
 
 #[derive(Error, Debug)]
 pub enum SessionError {
@@ -53,9 +52,9 @@ pub struct Session {
 
 impl Session {
     /// Creates a new instance of a `Session`.
-    /// 
+    ///
     /// It is required to have a `config.toml` file in the path directory.
-    /// 
+    ///
     /// # Example
     /// ```
     /// let session: Session = Session::new()?;
@@ -66,16 +65,16 @@ impl Session {
     }
 
     /// Creates a new instance of a `Session`.
-    /// 
+    ///
     /// It is required to have a `config.toml` file in the user's conig directory.
     /// Default authorization method is credential grant.
-    /// 
+    ///
     /// # Example
     /// ```
     /// let session: Session = Session::new(None)?;
-    /// 
+    ///
     /// let session: Session = Session::new(Some(Mode::Code))?;
-    /// 
+    ///
     /// let session: Session = Session::new(Some(Mode::Credential))?;
     /// ```
     pub async fn new(m: Option<Mode>) -> Result<Self, SessionError> {
@@ -115,7 +114,7 @@ impl Session {
             ("client_id", self.get_client_id()),
         ];
         let response = client
-            .get(format!("{}", uri))
+            .get(uri.to_string())
             .header(AUTHORIZATION, format!("Bearer {}", ac_token))
             .form(&params)
             .send()
@@ -147,11 +146,11 @@ impl Session {
 
     /// Generate new access_token and asign it to the session
     pub async fn generate_token_credentials(&mut self) -> Result<(), SessionError> {
-        self.access_token = Some(generate_token_credentials(self.clone()).await?);
+        self.access_token = Some(token::generate_token_credentials(self.clone()).await?);
         Ok(())
     }
     pub async fn generate_token(&mut self) -> Result<(), SessionError> {
-        self.access_token = Some(generate_token(self.clone()).await?);
+        self.access_token = Some(token::generate_token(self.clone()).await?);
         Ok(())
     }
     /// Get the `login` of the session

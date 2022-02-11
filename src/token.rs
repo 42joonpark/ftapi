@@ -53,10 +53,10 @@ pub async fn token_info(token: Option<String>) -> Result<TokenInfo, SessionError
 }
 
 /// Check if the token is valid.
-/// 
+///
 /// # Example
 /// ```
-/// let res = check_token_valide(Some("Some Token".to_string())).await; 
+/// let res = check_token_valide(Some("Some Token".to_string())).await?;
 /// ```
 pub async fn check_token_valide(token: Option<String>) -> Result<bool, SessionError> {
     let token_info = token_info(token).await?;
@@ -76,9 +76,9 @@ pub struct AccessToken {
 }
 
 /// Generate credential grant token.
-/// 
+///
 /// # Example
-/// 
+///
 /// ```
 /// let session = Session::new(Some(Mode::Credential)).await?;
 /// let access_token = generate_token_credentials(session.clone()).await?;
@@ -108,6 +108,14 @@ pub async fn generate_token_credentials(session: Session) -> Result<String, Sess
     }
 }
 
+/// Generate code grant token.
+///
+/// # Example
+///
+/// ```
+/// let session = Session::new(Some(Mode::Code)).await?;
+/// let access_token = generate_token(session.clone()).await?;
+/// ```
 pub async fn generate_token(session: Session) -> Result<String, SessionError> {
     let client = BasicClient::new(
         ClientId::new(String::from(session.get_client_id())),
@@ -129,7 +137,7 @@ pub async fn generate_token(session: Session) -> Result<String, SessionError> {
     Ok(ac_token)
 }
 
-/// Create local server with port number 8000 and waits for user to finish authorize.
+/// Creates local server with port number 8000 and waits for user to finish authorize.
 async fn local_server(client: BasicClient) -> Result<String, SessionError> {
     let ac_token;
     let listener = TcpListener::bind("127.0.0.1:8080").await.unwrap();
@@ -208,69 +216,3 @@ async fn local_server(client: BasicClient) -> Result<String, SessionError> {
     }
     Ok(ac_token)
 }
-
-
-// *************************************************************************
-//                                   Test
-// *************************************************************************
-
-#[tokio::test]
-async fn token_info_fail_test() {
-    let res = token_info(Some("not working token".to_string())).await;
-    // let res = token_info(None).await;
-    if let Ok(token_info) = res {
-        println!("{:?}", token_info); // cargo run test -- --nocapture
-        assert_eq!(token_info.application.is_none(), true);
-    }
-}
-
-/*
-#[tokio::test]
-async fn token_info_success_test() {
-    let res =
-        token_info("Some Working Token")
-            .await;
-    if let Ok(token_info) = res {
-        println!("{:?}", token_info);
-        assert_eq!(token_info.application.is_none(), false);
-    }
-}
-*/
-
-#[tokio::test]
-async fn check_token_valide_fail_test() {
-    let res = check_token_valide(Some("not working token".to_string())).await;
-    // let res = check_token_valide(None).await;
-    if let Ok(t) = res {
-        assert_eq!(t, false);
-    }
-}
-
-/*
-#[tokio::test]
-async fn check_token_valide_success_test() {
-    let res = check_token_valide(
-        "Some Working Token",
-    )
-    .await;
-    if let Ok(t) = res {
-        assert_eq!(t, true);
-    }
-}
-*/
-
-/*
-#[tokio::test]
-async fn authorize_test() {
-    // Don't forget to test with --nocapture option
-    let res = generate_token(Session {
-        client_id: "YOUR CLIENT_ID".to_string(),
-        client_secret: "YOUR CLIENT SECRET"
-            .to_string(),
-    })
-    .await;
-    if let Ok(t) = res {
-        assert_ne!(t, "".to_string());
-    }
-}
-*/
