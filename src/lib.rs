@@ -38,7 +38,7 @@ pub enum SessionError {
 
 pub enum Mode {
     Code,
-    Credential,
+    Credentials,
 }
 
 /// Build a session information.
@@ -59,24 +59,40 @@ impl Session {
     /// ```
     /// let session: Session = Session::new()?;
     /// ```
-    pub fn new_with_path(path: &str) -> Result<Self, SessionError> {
+    pub async fn new_with_path(path: &str, m: Option<Mode>) -> Result<Self, SessionError> {
         let content = fs::read_to_string(path)?;
-        Ok(toml::from_str(&content)?)
+        let mut session: Session = toml::from_str(&content)?;
+        if let Some(mode) = m {
+            match mode {
+                Mode::Code => {
+                    session.generate_token().await?;
+                }
+                Mode::Credentials => {
+                    session.generate_token_credentials().await?;
+                }
+            }
+        } else {
+            session.generate_token_credentials().await?;
+        }
+        Ok(session)
     }
 
+    /*
     /// Creates a new instance of a `Session`.
     ///
-    /// It is required to have a `config.toml` file in the user's conig directory.
-    /// Default authorization method is credential grant.
+    /// It is required to have a `config.toml` file in the user's conig directory.\
+    /// Default authorization method is credentials grant. \
     ///
     /// # Example
     /// ```
+    /// use ftapi::Session;
+    /// use ftapi::SessionError;
+    ///
     /// let session: Session = Session::new(None)?;
-    ///
     /// let session: Session = Session::new(Some(Mode::Code))?;
-    ///
-    /// let session: Session = Session::new(Some(Mode::Credential))?;
+    /// let session: Session = Session::new(Some(Mode::Credentials))?;
     /// ```
+     */
     pub async fn new(m: Option<Mode>) -> Result<Self, SessionError> {
         if let Some(dir) = BaseDirs::new() {
             let path = dir.config_dir().join("config.toml");
@@ -87,7 +103,7 @@ impl Session {
                     Mode::Code => {
                         session.generate_token().await?;
                     }
-                    Mode::Credential => {
+                    Mode::Credentials => {
                         session.generate_token_credentials().await?;
                     }
                 }
@@ -102,6 +118,18 @@ impl Session {
 }
 
 impl Session {
+    /// Send GET request to given uri. \
+    /// Need valid access token.
+    ///
+    /// # Example
+    /// ```
+    /// use ftapi::Session;
+    /// use ftapi::SessionError;
+    /// use ftapi::Mode;
+    ///
+    /// let session: Session = Session::new(Mode(None))?;
+    /// let result = session.call("https://api.intra.42.fr/v2/users")?;
+    /// ```
     pub async fn call(&self, uri: &str) -> Result<String, SessionError> {
         if self.access_token.is_none() {
             warn!("No access_token found");
